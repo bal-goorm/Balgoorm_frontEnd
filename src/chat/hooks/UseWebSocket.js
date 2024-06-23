@@ -11,7 +11,7 @@ const UseWebSocket = () => {
   const stompClient = useRef(null);
 
   const connect = useCallback(() => {
-    const socket = new SockJS("http://localhost:8080/api/chat");
+    const socket = new SockJS("http://localhost:8080/chat");
     stompClient.current = Stomp.over(socket);
     console.log("socket :", socket);
 
@@ -46,11 +46,14 @@ const UseWebSocket = () => {
   }, []);
 
   const sendMessage = (inputValue) => {
-    console.log("Sending message: ");
+    console.log("Sending message: " ,inputValue);
     if (stompClient.current && stompClient.current.connected) {
       const senderName = fetchedUser.nickname;
-      const chatMessage = `${senderName}: ${inputValue}`;
-      stompClient.current.send("/pub/chat", {}, chatMessage);
+      const chatMessage = {
+        senderName,
+        chatBody: inputValue
+      };
+      stompClient.current.send("/pub/chat", {}, JSON.stringify(chatMessage));
       
       // stompClient.current.send("/pub/chat", {}, JSON.stringify(payload));
       console.log("Sending message: ", chatMessage);
@@ -66,7 +69,7 @@ const UseWebSocket = () => {
 
   const fetchChatHistory = useCallback(async () => {
     try {
-      const response = await axios.get('http://localhost:8080/api/history');
+      const response = await axios.get('http://localhost:8080/history');
       const chatHistory = response.data;
       console.log("Fetched chat history: ", chatHistory);
 

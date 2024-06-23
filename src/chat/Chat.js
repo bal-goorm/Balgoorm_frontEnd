@@ -8,10 +8,12 @@ import { Button, Container, Form } from 'react-bootstrap';
 import { useMessage } from './MessageProvider';
 import './Chat.css'
 import { useAuth } from '../user/auth/AuthContext';
+import UseWebSocket from './hooks/UseWebSocket';
 
 function Chat() {
   const { fetchedUser } = useAuth();
   const { message, addMessage, handleKeyDown, setInputValue, inputValue} = useMessage();
+  const { sendMessage } = UseWebSocket();
 
   const handleSendMessage = useCallback(() => {
     if (inputValue.trim() !== '') {
@@ -20,10 +22,11 @@ function Chat() {
         chatBody: inputValue,
         currentUser: true
       };
-      addMessage(newMessage); // 직접 메시지를 추가
+      sendMessage(newMessage); // 직접 메시지를 추가
+      addMessage(newMessage);
       setInputValue(''); // 입력 필드 초기화
     }
-  }, [inputValue, addMessage, setInputValue, fetchedUser]);
+  }, [inputValue, addMessage, setInputValue, fetchedUser, sendMessage]);
 
   useEffect(() => {
     console.log("Current messages: ", message); // 상태 변경 시 메시지 로그
