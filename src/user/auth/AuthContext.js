@@ -47,7 +47,7 @@ export const AuthProvider = ({ children }) => {
     
     const signup = async (postData) => {
     try {
-        const response = await axios.post('https://k618de24a93cca.user-app.krampoline.com/api/signup', postData, {
+        const response = await axios.post('http://localhost:8080/api/signup', postData, {
             withCredentials: true
         });
         console.log("회원가입 성공!", response);
@@ -61,7 +61,7 @@ export const AuthProvider = ({ children }) => {
     const login = async (userData, navigateCallback) => {
         setIsLoading(true);
         try {
-            const response = await axios.post("https://k618de24a93cca.user-app.krampoline.com/api/login", userData, {
+            const response = await axios.post("http://localhost:8080/api/login", userData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }, withCredentials: true}
@@ -83,7 +83,7 @@ export const AuthProvider = ({ children }) => {
     const logout = async (navigate) => {
         setIsLoading(true);
         try {
-            await axios.post('https://k618de24a93cca.user-app.krampoline.com/api/logout', {}, { withCredentials: true });
+            await axios.post('http://http:localhost:8080/api/logout', {}, { withCredentials: true });
             Cookies.remove('token');
             Cookies.remove('role');
             setUser(null);
