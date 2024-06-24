@@ -37,7 +37,7 @@ export const MessageProvider = ({ children }) => {
 
     useEffect(() => {
         if(fetchedUser && fetchedUser.nickname) {
-            console.log("소켓 연결")
+            // console.log("소켓 연결")
             // connect();
         }
         return() => {
@@ -46,7 +46,9 @@ export const MessageProvider = ({ children }) => {
     }, [fetchedUser, connect, disconnect]);
     
     return (
-    <MessageContext.Provider value={{ message, setMessage, addMessage, handleKeyDown, inputValue, setInputValue }}>
+    <MessageContext.Provider value =
+    {{ message, setMessage, addMessage, 
+    handleKeyDown, inputValue, setInputValue }}>
         {children}
     </MessageContext.Provider>
     );

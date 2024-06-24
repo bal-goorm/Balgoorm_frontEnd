@@ -60,7 +60,7 @@ function Chat() {
           onKeyDown={handleKeyDown} 
           />
           </Form.Group>
-          <Button variant="primary" className='button-inline' onClick={handleSendMessage}>전송</Button>
+          <Button variant="primary" className='button-inline' onClick={sendMessage}>전송</Button>
       </Form>
     </Container> 
   </div>
