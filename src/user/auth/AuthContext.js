@@ -158,7 +158,7 @@ export const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         loadUserInfo();
-      }, [Cookies.get('token')]
+      }, []
     );
     
     const value = { 
