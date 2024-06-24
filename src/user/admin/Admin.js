@@ -5,44 +5,35 @@
 
 import React, { useEffect, useState } from 'react';
 import { Button, Table } from 'react-bootstrap';
-import UserEditModal from './UserEditModal.js';
 import './Admin.css';
-import { formatDate, useAuth } from '../auth/AuthContext.js';
+import { useAuth } from '../auth/AuthContext.js';
+import { useNavigate } from 'react-router-dom';
+import Cookies from 'js-cookie';
+import axios from 'axios';
 
 function Admin() {
-  const [showModal, setShowModal] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
-  const { allUsers, setAllUsers, userCount, fetchAllUsers, fetchCount, isLoading } = useAuth();
+  const { user, allUsers, fetchAllUsers, fetchCount, isLoading } = useAuth();
+  const [userCount, setUserCount] = useState(0);
 
   useEffect(() => {
     fetchAllUsers();
-    fetchCount();
+    fetchCount().then(count => setUserCount(count));
   }, []);
 
   if(isLoading) {
     return <div>Loading...</div>;
   }
-  
-  const handleEdit = (user) => {
-    setCurrentUser(user);
-    setShowModal(true);
-  }
 
-  const handleSave = (updateUser) => {
-    // 수정한 닉네임, 이메일 반영
-    const updateUsers = allUsers.map(user => {
-      if(user.id === updateUser.id) {
-        return { 
-          ...user, 
-          nickname: updateUser.nickname, 
-          email: updateUser.email, 
-          createDate: formatDate(updateUser.createDate)
-        };
-      }
-      return user;
-    });
-    setAllUsers(updateUsers);
-    setShowModal(false);
+  const handleDeleteUser = async (user) => {
+    try {
+      await axios.delete(`https://k618de24a93cca.user-app.krampoline.com/api/deleteUser/${user.userId}`, {data: {userId: user.userId}});
+      Cookies.remove('token');
+      Cookies.remove('role');
+      alert("계정이 삭제되었습니다.");
+      fetchAllUsers();
+    } catch (error) {
+      console.log("계정 삭제 실패 ", error);
+    }
   }
   
   return (
@@ -59,7 +50,7 @@ function Admin() {
                 <th className='column'>닉네임</th>
                 <th className='column-email'>이메일</th>
                 <th className='column-email'>생성시간</th>
-                <th className='column'>편집</th>
+                <th className='column'>방출</th>
               </tr>
             </thead>
             <tbody>
@@ -71,13 +62,12 @@ function Admin() {
                   <td className='column-user'>{user.email}</td>
                   <td className='column-user'>{user.createDate}</td>
                   <td>
-                    <Button variant='secondary' onClick={() => handleEdit(user)}>편집</Button>
+                    <Button variant='secondary' onClick={() => handleDeleteUser(user)}>방출</Button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </Table>
-          {showModal && <UserEditModal isOpen={showModal} user={currentUser} onSave={handleSave} onRequestClose={() => setShowModal(false)} />}
         </div>
       </div>
     </div>

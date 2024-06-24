@@ -30,9 +30,8 @@ function EditorPage() {
 
     console.log("user :", user);
     console.log("user dbid :", user.id);
-    axios.get(`https://k618de24a93cca.user-app.krampoline.com/api/quiz/detail/${id}?userId=${user.id}`)
+    axios.get(`https://k618de24a93cca.user-app.krampoline.com/api/quiz/detail/${id}?userId=${user.id}`, { withCredentials: true } )
       .then(response => {
-        console.log('response :', response);
         const data = response.data;
         console.log('Fetched problem data:', data);
         setQuiz(data);
@@ -48,20 +47,17 @@ function EditorPage() {
 
   function runCode() {
     if (editorRef.current) {
-      console.log("user :", user);
       const code = editorRef.current.getValue();
       const requestData = {
         quizId: id,
         language: selectedLanguage,
         code: code,
         userId: user.id
-        // id가 중복되는데 어떻게 변수를 지정해야할지
       };
       console.log("reqData :", requestData);
-      axios.post("https://k618de24a93cca.user-app.krampoline.com/api/ide/run", requestData)
+      axios.post("https://k618de24a93cca.user-app.krampoline.com/api/ide/run", requestData, { withCredentials: true })
         .then(response => {
           const data = response.data;
-          console.log("response data:", data);
           setOutput(data.result);
           setResponseData(data);
           setIsModalOpen(true);

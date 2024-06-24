@@ -1,7 +1,6 @@
 import axios from 'axios';
 import React, { useState, createContext, useContext, useEffect, useCallback } from 'react'
 import Cookies from 'js-cookie';
-import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext({
     user: null,
@@ -22,6 +21,7 @@ export function formatDate(dateString) {
     const day = String(date.getDate()).padStart(2, '0');
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
+    
     
     return `${year}-${month}-${day} ${hours}:${minutes}`;
 }
@@ -51,6 +51,7 @@ export const AuthProvider = ({ children }) => {
             withCredentials: true
         });
         console.log("회원가입 성공!", response);
+        alert("회원가입 성공!");
         setUser(response.data);
         return response.data;
     } catch (error) {
@@ -71,6 +72,7 @@ export const AuthProvider = ({ children }) => {
             setUserRole(role);
             setUser({ "userId": userData.userId, "role": role, "id": response.data.userId });
             console.log("로그인 성공");
+            alert('로그인 성공!');
             await loadUserInfo();
             navigateCallback(role);
         } catch(error) {
@@ -108,7 +110,7 @@ export const AuthProvider = ({ children }) => {
             return;
         }
         try {
-            const response = await axios.get('http://localhost:8080/api/myinfo', {
+            const response = await axios.get('https://k618de24a93cca.user-app.krampoline.com/api/myinfo', {
                 headers: { Authorization: `Bearer ${token}` },
                 withCredentials: true
             });
@@ -130,7 +132,7 @@ export const AuthProvider = ({ children }) => {
     // 모든 유저 정보 가져오기
     const fetchAllUsers = async() => {
         try {
-            const response = await axios.get('http://localhost:8080/api/admin/all', {
+            const response = await axios.get('https://k618de24a93cca.user-app.krampoline.com/api/admin/all', {
                 withCredentials: true
         });
         const formattedUsers = response.data.map(user => ({
@@ -145,7 +147,7 @@ export const AuthProvider = ({ children }) => {
 
     const fetchCount = async () => {
         try {
-            const response = await axios.get('http://localhost:8080/api/admin/totalUsers', {
+            const response = await axios.get('https://k618de24a93cca.user-app.krampoline.com/api/admin/totalUsers', {
                 withCredentials: true
         });
         console.log("response data: ", response.data);

@@ -3,32 +3,40 @@ import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faThumbsUp as solidThumbsUp } from '@fortawesome/free-solid-svg-icons';
 import { faThumbsUp as regularThumbsUp } from '@fortawesome/free-regular-svg-icons';
-import styles from './LikeButton.module.css'; // module.css 파일을 import
+import styles from './LikeButton.module.css';
 
-const LikeButton = ({ postId, isLikedInitially, likesCountInitially, onLikeToggle }) => {
-    const [isLiked, setIsLiked] = useState(isLikedInitially);
-    const [likesCount, setLikesCount] = useState(likesCountInitially);
-
-    useEffect(() => {
-        setIsLiked(isLikedInitially);
-        setLikesCount(likesCountInitially);
-    }, [isLikedInitially, likesCountInitially]);
+const LikeButton = ({ postId, initialLikesCount, initialIsLiked, onLikeToggle }) => {
+    const [isLiked, setIsLiked] = useState(initialIsLiked);
+    const [likesCount, setLikesCount] = useState(initialLikesCount);
 
     const handleLikeClick = async (event) => {
-        event.stopPropagation(); // 이벤트 전파를 막음
-        const newIsLiked = !isLiked;
-        setIsLiked(newIsLiked);
-        setLikesCount(prevCount => prevCount + (newIsLiked ? 1 : -1));
-
+        event.stopPropagation();
         try {
-            await axios.post(`http://localhost:8080/api/posts/${postId}/like`, { isLiked: newIsLiked });
-            onLikeToggle(postId, newIsLiked);
+            const url = isLiked 
+                ? `https://k618de24a93cca.user-app.krampoline.com/api/boards/${postId}/unlike` 
+                : `https://k618de24a93cca.user-app.krampoline.com/api/boards/${postId}/like`;
+
+            const postData = { isLiked: !isLiked };
+
+            const response = await axios.post(url, postData, {
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                withCredentials: true
+            });
+
+            setIsLiked(!isLiked);
+            setLikesCount(response.data.likesCount);
+            onLikeToggle(postId, !isLiked);
         } catch (error) {
             console.error('Error toggling like:', error);
-            setIsLiked(isLiked); // 에러가 발생하면 원래 상태로 롤백
-            setLikesCount(prevCount => prevCount - (newIsLiked ? 1 : -1));
         }
     };
+
+    useEffect(() => {
+        setIsLiked(initialIsLiked);
+        setLikesCount(initialLikesCount);
+    }, [initialIsLiked, initialLikesCount]);
 
     return (
         <div className={styles.likeButtonContainer} onClick={handleLikeClick}>

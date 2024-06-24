@@ -11,12 +11,12 @@ import ProtectedRoute from './user/auth/ProtectedRoute.js';
 import MyPage from './user/mypage/MyPage.js';
 import Admin from './user/admin/Admin.js';
 import QuizList from './quiz/QuizList.js';
-import TestEditorPage from './ide/EditorPage.js';
 import UseWebSocket from './chat/hooks/UseWebSocket.js';
 import { MessageProvider } from './chat/MessageProvider.js';
 import EditorPage from './ide/EditorPage.js';
 import Chat from './chat/Chat.js';
 import DeleteAccount from './user/DeleteAccount.js';
+import MainPage from './main/MainPage.js';
 
 function App() {
   return (
@@ -29,21 +29,15 @@ function App() {
               <Navbar />
               <div className="content">
                 <Routes>
-                  <Route path="/" />
+                  <Route path="/" element={<MainPage/>} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/signup" element={<Signup />} />
-                  <Route path="/mypage" element={<MyPage />} />
+                  <Route path="/mypage" element={<ProtectedRoute><MyPage /></ProtectedRoute>} />
                   <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
                   <Route path="/delete" element={<ProtectedRoute><DeleteAccount /></ProtectedRoute>} />
-                  {/* 기존 경로들 추가 */}
-                  {/* <Route path="/main" element={<MainPage />} /> */}
-                  {/* <Route path="/editor" element={<EditorPage />} />
-                  <Route path="/editortest" element={<TestEditorPage />} /> */}
-                  <Route path="/editor" element={<EditorPage />} />
-                  <Route path="/editortest" element={<TestEditorPage />} />
-                  <Route path="/quizlist" element={<QuizList />} />
-                  <Route path="/quiz/detail/:id" element={<EditorPage />} />
-                  <Route path="/chat" element={<Chat />} />
+                  <Route path="/quizlist" element={<ProtectedRoute><QuizList /></ProtectedRoute>} />
+                  <Route path="/quiz/detail/:id" element={<ProtectedRoute><EditorPage /></ProtectedRoute>} />
+                  <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
                 </Routes>
               </div>
             </div>

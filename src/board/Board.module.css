@@ -148,7 +148,7 @@
   background: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
-  align-items: flex-end; /* 항상 아래쪽에 위치 */
+  align-items: center; /* 항상 아래쪽에 위치 */
   z-index: 1000;
 }
 
@@ -160,7 +160,7 @@
   padding: 20px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   transform: translateY(100%);
-  animation: slideUp 0.3s forwards;
+  animation: slideUp 0.02s ease-out forwards;
 }
 
 @keyframes slideUp {
@@ -205,3 +205,24 @@
   background-color: #000000;
   color: #ffffff;
 }
+
+.editDeleteButtons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.editButton, .deleteButton, .confirmButton, .cancelButton {
+  padding: 8px 16px;
+  background-color: #ffffff;
+  color: #000000;
+  border: 1px solid #000000;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.editButton:hover, .deleteButton:hover, .confirmButton:hover, .cancelButton:hover {
+  background-color: #000000;
+  color: #ffffff;
+}
+

@@ -148,6 +148,7 @@ const UseWebSocket = () => {
       stompClient.current.disconnect(() => {
         console.log("Disconnected"); // 연결 해제 완료 시 로그 출력
       });
+      stompClient.current = null;
     }
   }, []);
 

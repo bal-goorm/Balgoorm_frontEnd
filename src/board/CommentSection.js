@@ -5,7 +5,7 @@ import { faPaperPlane, faUser, faTrash } from '@fortawesome/free-solid-svg-icons
 import styles from './CommentSection.module.css';
 import { useAuth } from '../user/auth/AuthContext';
 
-const CommentSection = ({ postId, userId }) => {
+const CommentSection = ({ postId }) => {
   const { user } = useAuth();
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
@@ -14,7 +14,7 @@ const CommentSection = ({ postId, userId }) => {
 
   const fetchComments = async () => {
     try {
-      const response = await axios.get(`http://localhost:8080/api/comments?postId=${postId}`);
+      const response = await axios.get(`https://k618de24a93cca.user-app.krampoline.com/api/board/${postId}/comment`);
       setComments(response.data);
     } catch (error) {
       console.error('Error fetching comments:', error);
@@ -23,17 +23,24 @@ const CommentSection = ({ postId, userId }) => {
 
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
-    if (!newComment.trim()) return;
+    if (!newComment.trim()) {
+      console.error('댓글 내용을 입력해주세요.');
+      return;
+    }
 
-    const newCommentData = {
-      boardId: postId,
-      userId,
+    if (!user) {
+      console.error('사용자가 로그인되지 않았습니다.');
+      return;
+    }
+
+    const postData = {
       commentContent: newComment,
-      likesCount: 0,
+      nickname: user.nickname,
+      userId: user.id,
     };
 
     try {
-      const response = await axios.post('http://localhost:8080/api/comments', newCommentData, {
+      const response = await axios.post(`https://k618de24a93cca.user-app.krampoline.com/api/board/${postId}/comment`, postData, {
         headers: {
           'Content-Type': 'application/json'
         },
@@ -43,16 +50,34 @@ const CommentSection = ({ postId, userId }) => {
       setComments([...comments, response.data]);
       setNewComment('');
     } catch (error) {
-      console.error('Error submitting comment:', error);
+      console.error('댓글 등록 중 오류 발생:', error);
+      if (error.response) {
+        console.error(`서버 오류: ${error.response.status} - ${error.response.data.message}`);
+      } else {
+        console.error('서버와 연결할 수 없습니다. 서버가 실행 중인지 확인하세요.');
+      }
+
+      // 서버 연결 오류 시 임의로 댓글 추가
+      const fakeComment = {
+        commentId: Date.now(),
+        boardId: postId,
+        userId: user.id,
+        nickname: user.nickname,
+        commentContent: newComment,
+        likesCount: 0,
+        commentCreateDate: new Date().toISOString(),
+      };
+      setComments([...comments, fakeComment]);
+      setNewComment('');
     }
   };
 
   const confirmDeleteComment = async () => {
     if (commentToDelete !== null) {
       try {
-        await axios.delete(`http://localhost:8080/api/board/1/comment${commentToDelete}`, {
+        await axios.delete(`https://k618de24a93cca.user-app.krampoline.com/api/board/${postId}/comment/${commentToDelete}`, {
           headers: {
-            'Content-Type': 'multipart/form-data'
+            'Content-Type': 'application/json'
           },
           withCredentials: true
         });
@@ -65,7 +90,6 @@ const CommentSection = ({ postId, userId }) => {
       }
     }
   };
-
 
   const openModal = (commentId) => {
     setCommentToDelete(commentId);
@@ -89,7 +113,7 @@ const CommentSection = ({ postId, userId }) => {
             <div className={styles.commentHeader}>
               <span className={styles.commentAuthor}>{comment.nickname}</span>
               <span className={styles.commentContent}>{comment.commentContent}</span>
-              {comment.userId === userId && (
+              {comment.userId === user?.id && (
                 <button
                   className={styles.deleteButton}
                   onClick={() => openModal(comment.commentId)}

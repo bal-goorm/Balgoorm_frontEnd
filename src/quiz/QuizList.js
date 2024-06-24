@@ -3,14 +3,14 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { Button } from 'react-bootstrap';
 import AOS from 'aos';
-import 'aos/dist/aos.css'; // Import AOS styles
+import 'aos/dist/aos.css';
 import './QuizList.css';
 import { useAuth } from '../user/auth/AuthContext';
 
 function QuizList() {
   const [quiz, setQuiz] = useState([]);
   const [page, setPage] = useState(1);
-  const [filter, setFilter] = useState('all'); // 'all', 'solved', 'unsolved'
+  const [filter, setFilter] = useState('all');
   const { user } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
@@ -18,10 +18,8 @@ function QuizList() {
     AOS.init({ duration: 500 });
 
     const fetchData = async () => {
-        console.log(user);
       try {
-        const response = await axios.get(`https://k618de24a93cca.user-app.krampoline.com/api/quiz/list/${page}?userId=${user.id}`);
-        console.log(response.data)
+        const response = await axios.get(`https://k618de24a93cca.user-app.krampoline.com/api/quiz/list/${page}?userId=${user.id}`, { withCredentials: true });
         setQuiz(response.data);
       } catch (error) {
         console.error('문제 요청 실패:', error);
@@ -33,7 +31,7 @@ function QuizList() {
 
   useEffect(() => {
     if (dropdownOpen) {
-      AOS.refresh(); // Reinitialize AOS when dropdown opens
+      AOS.refresh();
     }
   }, [dropdownOpen]);
 
@@ -55,7 +53,7 @@ function QuizList() {
   const filteredQuiz = quiz.filter(quizItem => {
     if (filter === 'solved') return quizItem.solved;
     if (filter === 'unsolved') return !quizItem.solved;
-    return true; // 'all'
+    return true;
   });
 
   const toggleDropdown = () => {

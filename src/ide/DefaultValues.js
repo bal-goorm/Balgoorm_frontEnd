@@ -7,10 +7,6 @@ const defaultValues = {
   }`,
   
     PYTHON: `#선택 된 언어 : Python
-    def add_numbers(a, b):
-      return a + b
-  
-  result = add_numbers(10, 5)
   print(result, end='')`,
   
     CPP: `//선택 된 언어 : C++

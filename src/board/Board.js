@@ -7,9 +7,10 @@ import LikeButton from './LikeButton';
 import CommentSection from './CommentSection';
 import BoardWrite from './BoardWrite';
 import BoardPagination from './BoardPagination';
-import SearchBar from './SearchBar';
+import SearchBar from './SearchBar'; // SearchBar 컴포넌트 불러오기
 import styles from './Board.module.css';
 import { useAuth } from '../user/auth/AuthContext';
+moment.locale('ko');
 
 const Board = () => {
   const { user } = useAuth();
@@ -19,14 +20,16 @@ const Board = () => {
   const [visiblePost, setVisiblePost] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [postToEdit, setPostToEdit] = useState(null);
+  const [postToDelete, setPostToDelete] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [showLoginMessage, setShowLoginMessage] = useState(false);
-  const postsPerPage = 10;
+  const postsPerPage = 5;
 
   const fetchPosts = async () => {
     try {
-      const response = await axios.get('http://localhost:8080/api/boards?page=0&pageSize=10&direction=DESC&sortBy=likes');
+      const response = await axios.get('https://k618de24a93cca.user-app.krampoline.com/api/boards?page=0&pageSize=10&direction=DESC&sortBy=likes');
       setPosts(response.data);
       setDisplayedPosts(response.data.slice(0, postsPerPage));
       setTotalPages(Math.ceil(response.data.length / postsPerPage));
@@ -37,6 +40,7 @@ const Board = () => {
         boardTitle: '임시 게시물 제목',
         boardContent: '서버에 연결할 수 없어 임시로 추가된 게시물입니다.',
         category: '기타',
+        userId: 'admin',
         nickname: '관리자',
         boardCreateDate: new Date().toISOString(),
         views: 0,
@@ -67,32 +71,26 @@ const Board = () => {
   };
 
   const handleSearch = (searchTerm) => {
-    const filteredPosts = posts.filter(post => post.boardTitle.includes(searchTerm));
+    const lowercasedSearchTerm = searchTerm.toLowerCase();
+    const filteredPosts = posts.filter(post => 
+      (post.boardTitle && post.boardTitle.toLowerCase().includes(lowercasedSearchTerm)) ||
+      (post.boardContent && post.boardContent.toLowerCase().includes(lowercasedSearchTerm)) ||
+      // (post.nickname && post.nickname.toLowerCase().includes(lowercasedSearchTerm)) ||
+      (post.comments && post.comments.some(comment => comment.content && comment.content.toLowerCase().includes(lowercasedSearchTerm)))
+    );
     setDisplayedPosts(filteredPosts.slice(0, postsPerPage));
     setTotalPages(Math.ceil(filteredPosts.length / postsPerPage));
     setCurrentPage(1);
   };
+  
 
   const togglePostVisibility = (postId) => {
     setVisiblePost(visiblePost === postId ? null : postId);
   };
 
-  const handleLikeToggle = async (postId, isLiked) => {
-    try {
-      const response = await axios.post(`http://localhost:8080/api/posts/${postId}/like`, { isLiked });
-      const updatedPosts = posts.map(post =>
-        post.boardId === postId ? { ...post, likesCount: response.data.likesCount } : post
-      );
-      setPosts(updatedPosts);
-      filterPosts(selectedCategory);
-    } catch (error) {
-      console.error('Error toggling like:', error);
-    }
-  };
-
   const handleCommentUpdate = async (postId) => {
     try {
-      const response = await axios.get(`http://localhost:8080/api/boards/${postId}`);
+      const response = await axios.get(`https://k618de24a93cca.user-app.krampoline.com/api/boards/${postId}`);
       const updatedPosts = posts.map(post =>
         post.boardId === postId ? response.data : post
       );
@@ -107,7 +105,6 @@ const Board = () => {
     if (!user) {
       setShowLoginMessage(true);
       return;
-      console.log("로그인안됨");
     }
     setIsFormOpen(true);
     setPostToEdit(null);
@@ -120,6 +117,23 @@ const Board = () => {
   const handleEditButtonClick = (post) => {
     setPostToEdit(post);
     setIsFormOpen(true);
+  };
+
+  const handleDeleteClick = (post) => {
+    setPostToDelete(post);
+    setIsModalOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    setPosts(posts.filter(post => post.boardId !== postToDelete.boardId));
+    setDisplayedPosts(displayedPosts.filter(post => post.boardId !== postToDelete.boardId));
+    setIsModalOpen(false);
+    setPostToDelete(null);
+  };
+
+  const handleCancelDelete = () => {
+    setIsModalOpen(false);
+    setPostToDelete(null);
   };
 
   const handlePageChange = (page) => {
@@ -138,6 +152,20 @@ const Board = () => {
     setShowLoginMessage(false);
   };
 
+  const handleLikeToggle = (postId, isLiked) => {
+    const updatedPosts = posts.map(post => {
+      if (post.boardId === postId) {
+        return {
+          ...post,
+          likesCount: isLiked ? post.likesCount + 1 : post.likesCount - 1,
+          isLiked: isLiked
+        };
+      }
+      return post;
+    });
+    setPosts(updatedPosts);
+  };
+
   return (
     <div className={styles.boardContainer}>
       <h2 className={styles.boardTitle}>토론</h2>
@@ -152,7 +180,7 @@ const Board = () => {
             <option value="기타">기타</option>
           </select>
         </div>
-        <SearchBar onSearch={handleSearch} />
+        <SearchBar onSearch={handleSearch} /> {/* SearchBar 컴포넌트 사용 */}
       </div>
 
       <ul className={styles.postList}>
@@ -179,9 +207,23 @@ const Board = () => {
             {visiblePost === post.boardId && (
               <div className={styles.postContent}>
                 <p>{post.boardContent}</p>
-                <LikeButton postId={post.boardId} isLiked={false} onLikeToggle={handleLikeToggle} />
+                <div className={styles.postMeta}>
+                  <LikeButton 
+                    postId={post.boardId} 
+                    initialLikesCount={post.likesCount} 
+                    initialIsLiked={post.isLiked || false} 
+                    onLikeToggle={handleLikeToggle} 
+                  />
+                  <span className={styles.views}>조회수 {post.views}</span>&nbsp;
+                  <span className={styles.comments}>댓글 {post.comments.length}</span>
+                </div>
                 <CommentSection postId={post.boardId} comments={post.comments} onCommentUpdate={handleCommentUpdate} />
-                <button onClick={() => handleEditButtonClick(post)}>수정</button>
+                {user && post.userId === user.userId && (
+                  <div className={styles.editDeleteButtons}>
+                    <button onClick={() => handleEditButtonClick(post)} className={styles.editButton}>수정</button>
+                    <button onClick={() => handleDeleteClick(post)} className={styles.deleteButton}>삭제</button>
+                  </div>
+                )}
               </div>
             )}
           </li>
@@ -210,6 +252,16 @@ const Board = () => {
           </div>
         )}
       </div>
+
+      {isModalOpen && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <p>게시글을 삭제하시겠습니까?</p>
+            <button onClick={handleConfirmDelete} className={styles.confirmButton}>삭제</button>
+            <button onClick={handleCancelDelete} className={styles.cancelButton}>취소</button>
+          </div>
+        </div>
+      )}
 
       <footer className={styles.footer}>
         <BoardPagination

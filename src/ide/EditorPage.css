@@ -110,6 +110,7 @@
 
 .editor-box {
     width: 100%;
+    min-width: 570px;
     height: 70%;
     padding: 5px;
 }

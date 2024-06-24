@@ -1,7 +1,6 @@
 import React from 'react';
 import './Navbar.css';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { Logout } from '../../img/LogoutImg';
 import { Login } from '../../img/LoginImg';
 import { Mypage } from '../../img/MyPageImg';

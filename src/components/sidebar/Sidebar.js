@@ -4,11 +4,14 @@ import './Sidebar.css';
 import { useMessage } from '../../chat/MessageProvider';
 import { ChatIcon } from '../../img/ChatIcon';
 import UseWebSocket from '../../chat/hooks/UseWebSocket';
+import { useAuth } from '../../user/auth/AuthContext';
+
 
 function Sidebar() {
+  const { user } = useAuth();
   const location = useLocation();
   const { message } = useMessage();
-  const isAdminPage = location.pathname === '/admin';
+  const isAdmin = user && user.role === 'ADMIN';
   const isNotChatPage = location.pathname !== '/chat';
   const { connect, joinChatRoom, fetchChatHistory } = UseWebSocket();
 
@@ -28,13 +31,10 @@ function Sidebar() {
         </div>
         <br />
         <ul>
-          <li><Link to="/login">메인 화면</Link></li>
-          <li><Link to="/quizlist">문제 풀기</Link></li>
-          <li><Link to="/editortest">테스트용 IDE</Link></li>
-          <li><Link to="/editor">질의응답 게시판</Link></li>
-          <li><Link to="/chat">채팅</Link></li>
-          <li><Link to="/editor">Test Menu</Link></li>
-          {isAdminPage && (
+          <li><Link to="/">메인 화면</Link></li>
+          <li><Link to="/quizlist">✏️문제 풀기</Link></li>
+          <li><Link onClick={handleConnect} to="/chat">📭채팅</Link></li>
+          {isAdmin && (
             <div className="admin-menu">
               <li><Link to="/admin">관리자 메뉴</Link></li>
               <li><Link to="/delete">삭제 메뉴</Link></li>
