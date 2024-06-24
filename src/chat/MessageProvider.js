@@ -1,6 +1,5 @@
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useState } from 'react';
 import UseWebSocket from './hooks/UseWebSocket';
-import { useAuth } from '../user/auth/AuthContext';
 
 const MessageContext = createContext({
     message: [],
@@ -11,11 +10,9 @@ const MessageContext = createContext({
 });
 
 export const MessageProvider = ({ children }) => {
-    const { fetchedUser } = useAuth();
-    const { sendMessage, connect, disconnect } = UseWebSocket();
+    const { sendMessage } = UseWebSocket();
     const [inputValue, setInputValue] = useState(''); // 사용자 입력 저장 변수
-    const [message, setMessage] = useState([
-    ]);
+    const [message, setMessage] = useState([]);
     
     const addMessage = useCallback((newMessage) => {
         setMessage((prevMessage) => {

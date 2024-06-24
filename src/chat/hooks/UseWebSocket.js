@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { useMessage } from '../MessageProvider.js';
 import { Stomp } from '@stomp/stompjs';
 import axios from 'axios';
@@ -7,9 +7,10 @@ import SockJS from 'sockjs-client';
 
 const UseWebSocket = () => {
   const { addMessage } = useMessage(); // MessageProvider에서 제공하는 컨텍스트 사용
-  const { fetchedUser, loadUserInfo } = useAuth(); // 사용자 인증 정보 사용
+  const { fetchedUser } = useAuth(); // 사용자 인증 정보 사용
   const stompClient = useRef(null); // 웹소켓 클라이언트 객체를 useRef를 통해 저장
-  const { message, setInputValue, inputValue, setMessage} = useMessage();
+  const { inputValue, setMessage} = useMessage();
+  const [chatCount, setChatCount] = useState(0);
 
   function wait(ms) {
     return new Promise(waitJoin => {
@@ -17,15 +18,8 @@ const UseWebSocket = () => {
     });
   }
 
-//   useEffect(() => {
-//     if (!fetchedUser) {
-//         loadUserInfo();
-//     }
-// }, [fetchedUser, loadUserInfo]);
-
   // 채팅방에 입장하는 함수
   const joinChatRoom = useCallback(() => {
-    // const joinMessage = `${fetchedUser.nickname}님이 입장하셨습니다.`;
 
     console.log("채팅방 입장 함수: ", stompClient.current.connected);
 
@@ -46,7 +40,7 @@ const UseWebSocket = () => {
       });
 
     }
-  }, [fetchedUser?.nickname]);
+  }, [addMessage, fetchedUser?.nickname]);
   
 
   // 웹소켓 연결 함수
@@ -62,7 +56,6 @@ const UseWebSocket = () => {
         "/sub/chat",
         (message) => {
           //구독한 경로로부터 메시지가 들어오는 부분 
-          // console.log("/sub/chat 에서 들어온 메시지: " + message);
           const messageBody = message.body.trim();
           console.log("/sub/chat 에서 들어온 메시지: " + messageBody);
           
@@ -85,7 +78,6 @@ const UseWebSocket = () => {
           "/sub/join",
           (message) => {
             //구독한 경로로부터 메시지가 들어오는 부분 
-            // console.log("/sub/chat 에서 들어온 메시지: " + message);
             const messageBody = message.body.trim();
             const [senderName, chatBody] = messageBody.split(':');
             console.log("/sub/join 에서 들어온 메시지: " + messageBody);
@@ -104,26 +96,23 @@ const UseWebSocket = () => {
           "/sub/active-users",
           (message) => {
             //구독한 경로로부터 메시지가 들어오는 부분 
-            // console.log("/sub/active-users 에서 들어온 메시지: " + message);
             const messageBody = message.body.trim();
             console.log("/sub/active-users 에서 들어온 메시지: " + messageBody);
-            const countMessage = {
-              chatCount: messageBody
-            }
-            setMessage(countMessage);
+            setChatCount(parseInt(messageBody, 10));
           });
 
           async function waitTime(){
             await wait(500);
             joinChatRoom();
+            // setChatCount(prevCount => prevCount + 1);
           }
-
           waitTime();
-
-    }, (error) => {
-      console.error('Connection error: ', error); // 연결 실패 시 에러 처리
-    });
-  }, [addMessage, fetchedUser?.nickname]);
+        }, (error) => {
+          console.error('Connection error: ', error); // 연결 실패 시 에러 처리
+        }
+      );
+    }, [addMessage, joinChatRoom, fetchedUser?.nickname]
+  );
 
   const sendMessage = () => {
     console.log("sendMessage 조건문 외부");
@@ -186,7 +175,7 @@ const UseWebSocket = () => {
   }, [setMessage, fetchedUser?.nickname]);
 
   // sendMessage, connect, disconnect 함수를 외부에 제공
-  return { sendMessage, connect, disconnect, fetchChatHistory, joinChatRoom };
+  return { sendMessage, connect, disconnect, fetchChatHistory, joinChatRoom, chatCount };
 }
 
 export default UseWebSocket;

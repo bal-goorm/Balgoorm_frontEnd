@@ -7,25 +7,21 @@ import React, { useCallback, useEffect } from 'react'
 import { Button, Container, Form } from 'react-bootstrap';
 import { useMessage } from './MessageProvider';
 import './Chat.css'
-import { useAuth } from '../user/auth/AuthContext';
 import UseWebSocket from './hooks/UseWebSocket';
 
 function Chat() {
-  const { fetchedUser } = useAuth();
   const { message, setInputValue, inputValue} = useMessage();
-  const { sendMessage, connect, disconnect, fetchChatHistory, joinChatRoom } = UseWebSocket();
+  const { sendMessage, connect, disconnect, fetchChatHistory, joinChatRoom, chatCount } = UseWebSocket();
 
   useEffect(() => {
     connect();
     fetchChatHistory();
-    // joinChatRoom();
     return() => {
       disconnect();
     }
   }, [connect, disconnect, joinChatRoom, fetchChatHistory]);
 
   const handleSendMessage = useCallback(() => {
-    // joinChatRoom();
     if (inputValue.trim() !== "") {
       sendMessage(inputValue);
       setInputValue(""); // 메시지 전송 후 입력 필드 초기화
@@ -34,7 +30,7 @@ function Chat() {
   
   return (
     <div>
-      {typeof message.chatCount === 'string' && <div>총 회원수: {message.chatCount}명</div>}
+      <div>총 회원수: {chatCount}명</div>
       <Container className='chatting-container'>
         {message.map((msg, index) => (
           <div className={`message-box ${msg.currentUser ? 'right' : 'left'}`} key={index}>
