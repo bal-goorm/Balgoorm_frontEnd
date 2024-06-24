@@ -1,7 +1,7 @@
 import { rest } from 'msw'
 
 export const handlers = [
-    rest.post('https://k618de24a93cca.user-app.krampoline.com/login', (req, res, ctx) => {
+    rest.post('http://localhost:8080/api/login', (req, res, ctx) => {
         const { id, password } = req.body;
         console.log('request receiverd: ', {id, password});
 

@@ -51,7 +51,7 @@ const UseWebSocket = () => {
 
   // 웹소켓 연결 함수
   const connect = useCallback(() => {
-    const socket = new SockJS("https://k618de24a93cca.user-app.krampoline.com/chat"); // SockJS를 이용한 소켓 생성
+    const socket = new SockJS("http://localhost:8080/api/chat"); // SockJS를 이용한 소켓 생성
     stompClient.current = Stomp.over(socket); // Stomp 클라이언트 생성 및 소켓 연결
     console.log("connect 함수 동작");
 
@@ -59,7 +59,7 @@ const UseWebSocket = () => {
     stompClient.current.connect({}, () => {
       // joinChatRoom();
       stompClient.current.subscribe(
-        "/sub/chat",
+        "/api/sub/chat",
         (message) => {
           //구독한 경로로부터 메시지가 들어오는 부분 
           // console.log("/sub/chat 에서 들어온 메시지: " + message);
@@ -78,7 +78,7 @@ const UseWebSocket = () => {
         });
 
         stompClient.current.subscribe(
-          "/sub/join",
+          "/api/sub/join",
           (message) => {
             //구독한 경로로부터 메시지가 들어오는 부분 
             // console.log("/sub/chat 에서 들어온 메시지: " + message);
@@ -97,7 +97,7 @@ const UseWebSocket = () => {
 
 
       stompClient.current.subscribe(
-          "/sub/active-users",
+          "/api/sub/active-users",
           (message) => {
             //구독한 경로로부터 메시지가 들어오는 부분 
             // console.log("/sub/active-users 에서 들어온 메시지: " + message);
@@ -127,7 +127,7 @@ const UseWebSocket = () => {
     if (stompClient.current && stompClient.current.connected) {
       console.log("sendMessage 조건문 내부");
       stompClient.current.send(
-        "/pub/chat",
+        "/api/pub/chat",
         {},
         JSON.stringify({
           senderName : fetchedUser.nickname,
@@ -155,7 +155,7 @@ const UseWebSocket = () => {
   // 채팅 히스토리 가져오기 함수
   const fetchChatHistory = useCallback(async () => {
     try {
-      const response = await axios.get('https://k618de24a93cca.user-app.krampoline.com/history'); // 채팅 히스토리 요청
+      const response = await axios.get('http://localhost:8080/api/history'); // 채팅 히스토리 요청
       const chatHistory = response.data.reverse(); // 응답 데이터 저장 및 역순 정렬
 
       if (!fetchedUser?.nickname) {

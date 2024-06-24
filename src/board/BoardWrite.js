@@ -21,14 +21,14 @@ const BoardWrite = ({ onClose, postToEdit, onPostSubmit }) => {
 
       let response;
       if (postToEdit) {
-        response = await axios.put(`https://k618de24a93cca.user-app.krampoline.com/api/boards/${postToEdit.boardId}`, formData, {
+        response = await axios.put(`http://localhost:8080/api/boards/${postToEdit.boardId}`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           },
           withCredentials: true
         });
       } else {
-        response = await axios.post('https://k618de24a93cca.user-app.krampoline.com/api/boards', formData, {
+        response = await axios.post('http://localhost:8080/api/boards', formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           },

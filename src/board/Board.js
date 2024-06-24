@@ -29,7 +29,7 @@ const Board = () => {
 
   const fetchPosts = async () => {
     try {
-      const response = await axios.get('https://k618de24a93cca.user-app.krampoline.com/api/boards?page=0&pageSize=10&direction=DESC&sortBy=likes');
+      const response = await axios.get('http://localhost:8080/api/boards?page=0&pageSize=10&direction=DESC&sortBy=likes');
       setPosts(response.data);
       setDisplayedPosts(response.data.slice(0, postsPerPage));
       setTotalPages(Math.ceil(response.data.length / postsPerPage));
@@ -90,7 +90,7 @@ const Board = () => {
 
   const handleCommentUpdate = async (postId) => {
     try {
-      const response = await axios.get(`https://k618de24a93cca.user-app.krampoline.com/api/boards/${postId}`);
+      const response = await axios.get(`http://localhost:8080/api/boards/${postId}`);
       const updatedPosts = posts.map(post =>
         post.boardId === postId ? response.data : post
       );
