@@ -10,9 +10,14 @@ function Sidebar() {
   const { message } = useMessage();
   const isAdminPage = location.pathname === '/admin';
   const isNotChatPage = location.pathname !== '/chat';
-  const { connect } = UseWebSocket();
+  const { connect, joinChatRoom, fetchChatHistory } = UseWebSocket();
 
-  const handleConnect = () => {connect()}
+  const handleConnect = () => {
+    // connect();
+    // alert('채팅방에 입장하셨습니다');
+    // joinChatRoom();
+    // fetchChatHistory();
+  }
 
   return (
     <div className="sidebar">

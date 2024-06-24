@@ -6,9 +6,35 @@ import { useAuth } from '../../user/auth/AuthContext.js';
 import SockJS from 'sockjs-client';
 
 const UseWebSocket = () => {
-  const { addMessage, setInputValue } = useMessage(); // MessageProvider에서 제공하는 컨텍스트 사용
+  const { addMessage } = useMessage(); // MessageProvider에서 제공하는 컨텍스트 사용
   const { fetchedUser } = useAuth(); // 사용자 인증 정보 사용
   const stompClient = useRef(null); // 웹소켓 클라이언트 객체를 useRef를 통해 저장
+
+  // 채팅방에 입장하는 함수
+  const joinChatRoom = useCallback(() => {
+    const joinMessage = `${fetchedUser.nickname}님이 입장하셨습니다.`;
+    console.log("채팅방 입장 함수: ", stompClient.current.connected);
+    // if (stompClient.current && stompClient.current.connected && fetchedUser && fetchedUser?.nickname) {
+      if (stompClient.current && stompClient.current.connected) {
+      // const chatMessage = `${fetchedUser.nickname}: 입장하였습니다.`;
+      console.log("입장 메시지 전송중");
+      stompClient.current.send(
+        "pub/chat",
+        {},
+        JSON.stringify({
+          senderName : "testNameJoin",
+          chatBody : "testChatBody"
+        })
+      ); // "/pub/join" 주제로 입장 메시지 전송
+
+      // 입장 메시지를 로컬 상태에 추가
+      addMessage({
+        senderName: fetchedUser.nickname,
+        chatBody: joinMessage,
+        currentUser: true
+      });
+    }
+  }, [addMessage, fetchedUser]);
 
   // 웹소켓 연결 함수
   const connect = useCallback(() => {
@@ -18,6 +44,8 @@ const UseWebSocket = () => {
 
     //실제 연결 시도 하는 부분 
     stompClient.current.connect({}, () => {
+      joinChatRoom();
+      console.log("채팅방 입장 함수 실행", stompClient.current.connect);
       stompClient.current.subscribe(
         "/sub/chat",
         (message) => {
@@ -25,12 +53,19 @@ const UseWebSocket = () => {
           // console.log("/sub/chat 에서 들어온 메시지: " + message);
           const messageBody = message.body.trim();
           console.log("/sub/chat 에서 들어온 메시지: " + messageBody);
+
+          // MessageProvider에 메시지 추가
+          addMessage({
+            senderName: messageBody.senderName,
+            chatBody: messageBody.chatBody,
+            currentUser: fetchedUser.nickname === messageBody.senderName
+        });
         }
       )
     }, (error) => {
       console.error('Connection error: ', error); // 연결 실패 시 에러 처리
     });
-  }, [addMessage]);
+  }, [addMessage, joinChatRoom, fetchedUser]);
 
   const sendMessage = () => {
     console.log("sendMessage 조건문 외부");
@@ -66,21 +101,7 @@ const UseWebSocket = () => {
   //   });
   // };
 
-  // 채팅방에 입장하는 함수
-  const joinChatRoom = useCallback(() => {
-    // if (stompClient.current && stompClient.current.connected && fetchedUser && fetchedUser?.nickname) {
-      if (stompClient.current && stompClient.current.connected) {
-      // const chatMessage = `${fetchedUser.nickname}: 입장하였습니다.`;
-      console.log("채팅방 입장 함수: ");
-      stompClient.current.send(
-        "pub/chat",
-        {},
-        JSON.stringify({
-          senderName : "testNameJoin",
-          chatBody : "testChatBody"
-        })); // "/pub/join" 주제로 입장 메시지 전송
-    }
-  }, [fetchedUser]);
+  
 
   // 웹소켓 연결 해제 함수
   const disconnect = useCallback(() => {
@@ -131,7 +152,7 @@ const UseWebSocket = () => {
   }, [addMessage, fetchedUser]);
 
   // sendMessage, connect, disconnect 함수를 외부에 제공
-  return { sendMessage, connect, disconnect };
+  return { sendMessage, connect, disconnect, fetchChatHistory, joinChatRoom };
 }
 
 export default UseWebSocket;

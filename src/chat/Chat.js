@@ -12,25 +12,25 @@ import UseWebSocket from './hooks/UseWebSocket';
 
 function Chat() {
   const { fetchedUser } = useAuth();
-  const { message, addMessage, handleKeyDown, setInputValue, inputValue} = useMessage();
-  const { sendMessage } = UseWebSocket();
-
-  const handleSendMessage = useCallback(() => {
-    if (inputValue.trim() !== '') {
-      const newMessage = {
-        senderName: fetchedUser.nickname,
-        chatBody: inputValue,
-        currentUser: true
-      };
-      sendMessage(newMessage); // 직접 메시지를 추가
-      addMessage(newMessage);
-      setInputValue(''); // 입력 필드 초기화
-    }
-  }, [inputValue, addMessage, setInputValue, fetchedUser, sendMessage]);
+  const { message, setInputValue, inputValue} = useMessage();
+  const { sendMessage, connect, disconnect, fetchChatHistory, joinChatRoom } = UseWebSocket();
 
   useEffect(() => {
-    console.log("Current messages: ", message); // 상태 변경 시 메시지 로그
-  }, [message]);
+    connect();
+    fetchChatHistory();
+    // joinChatRoom();
+    return() => {
+      disconnect();
+    }
+  }, [connect, disconnect, joinChatRoom, fetchChatHistory]);
+
+  const handleSendMessage = useCallback(() => {
+    // joinChatRoom();
+    if (inputValue.trim() !== "") {
+      sendMessage(inputValue);
+      setInputValue(""); // 메시지 전송 후 입력 필드 초기화
+    }
+  }, [inputValue, sendMessage, setInputValue]);
   
   return (
   <div>
@@ -57,10 +57,15 @@ function Chat() {
           placeholder="메시지 입력" 
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)} 
-          onKeyDown={handleKeyDown} 
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              handleSendMessage();
+            }
+          }} 
           />
           </Form.Group>
-          <Button variant="primary" className='button-inline' onClick={sendMessage}>전송</Button>
+          <Button variant="primary" className='button-inline' onClick={handleSendMessage}>전송</Button>
       </Form>
     </Container> 
   </div>

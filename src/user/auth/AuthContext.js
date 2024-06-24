@@ -83,7 +83,7 @@ export const AuthProvider = ({ children }) => {
     const logout = async (navigate) => {
         setIsLoading(true);
         try {
-            await axios.post('http://http:localhost:8080/api/logout', {}, { withCredentials: true });
+            await axios.post('http://localhost:8080/api/logout', {}, { withCredentials: true });
             Cookies.remove('token');
             Cookies.remove('role');
             setUser(null);
