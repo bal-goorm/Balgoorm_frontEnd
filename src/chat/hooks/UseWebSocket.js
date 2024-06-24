@@ -144,6 +144,10 @@ const UseWebSocket = () => {
       console.log("응답 데이터: ", chatHistory);
       console.log("message 데이터", message);
       
+      if(fetchedUser === null ) {
+        return
+      }
+
       chatHistory.forEach(message => {
         const newMessage = {
           senderName: message.senderName.trim(),
