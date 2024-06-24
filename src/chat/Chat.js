@@ -18,7 +18,6 @@ function Chat() {
   useEffect(() => {
     connect();
     fetchChatHistory();
-    // joinChatRoom();
     return() => {
       disconnect();
     }

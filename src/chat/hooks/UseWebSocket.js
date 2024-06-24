@@ -7,34 +7,41 @@ import SockJS from 'sockjs-client';
 
 const UseWebSocket = () => {
   const { addMessage } = useMessage(); // MessageProvider에서 제공하는 컨텍스트 사용
-  const { fetchedUser } = useAuth(); // 사용자 인증 정보 사용
+  const { fetchedUser, loadUserInfo } = useAuth(); // 사용자 인증 정보 사용
   const stompClient = useRef(null); // 웹소켓 클라이언트 객체를 useRef를 통해 저장
+  const { message, setInputValue, inputValue} = useMessage();
+
+  useEffect(() => {
+    if (!fetchedUser) {
+        loadUserInfo();
+    }
+}, [fetchedUser, loadUserInfo]);
 
   // 채팅방에 입장하는 함수
   const joinChatRoom = useCallback(() => {
-    const joinMessage = `${fetchedUser.nickname}님이 입장하셨습니다.`;
+    // const joinMessage = `${fetchedUser.nickname}님이 입장하셨습니다.`;
+
     console.log("채팅방 입장 함수: ", stompClient.current.connected);
-    // if (stompClient.current && stompClient.current.connected && fetchedUser && fetchedUser?.nickname) {
+
       if (stompClient.current && stompClient.current.connected) {
-      // const chatMessage = `${fetchedUser.nickname}: 입장하였습니다.`;
-      console.log("입장 메시지 전송중");
       stompClient.current.send(
-        "pub/chat",
+        "pub/join",
         {},
         JSON.stringify({
-          senderName : "testNameJoin",
-          chatBody : "testChatBody"
+          senderName : fetchedUser.nickname,
+          chatBody : "님이 입장하셨습니다."
         })
       ); // "/pub/join" 주제로 입장 메시지 전송
 
       // 입장 메시지를 로컬 상태에 추가
-      addMessage({
-        senderName: fetchedUser.nickname,
-        chatBody: joinMessage,
-        currentUser: true
-      });
+      // addMessage({
+      //   senderName: fetchedUser.nickname,
+      //   chatBody: joinMessage,
+      //   currentUser: true
+      // });
     }
   }, [addMessage, fetchedUser]);
+  
 
   // 웹소켓 연결 함수
   const connect = useCallback(() => {
@@ -44,8 +51,7 @@ const UseWebSocket = () => {
 
     //실제 연결 시도 하는 부분 
     stompClient.current.connect({}, () => {
-      joinChatRoom();
-      console.log("채팅방 입장 함수 실행", stompClient.current.connect);
+      // joinChatRoom();
       stompClient.current.subscribe(
         "/sub/chat",
         (message) => {
@@ -53,15 +59,49 @@ const UseWebSocket = () => {
           // console.log("/sub/chat 에서 들어온 메시지: " + message);
           const messageBody = message.body.trim();
           console.log("/sub/chat 에서 들어온 메시지: " + messageBody);
-
-          // MessageProvider에 메시지 추가
-          addMessage({
-            senderName: messageBody.senderName,
-            chatBody: messageBody.chatBody,
-            currentUser: fetchedUser.nickname === messageBody.senderName
+          
+          const [senderName, chatBody] = messageBody.split(': ');
+          if(senderName !== fetchedUser.nickname) {
+            addMessage({
+              senderName: senderName.trim(),
+              chatBody: chatBody.trim(),
+              currentUser: senderName.trim() === fetchedUser.username, // 현재 사용자인지 확인
+            });
+          }
         });
-        }
-      )
+
+        stompClient.current.subscribe(
+          "/sub/join",
+          (message) => {
+            //구독한 경로로부터 메시지가 들어오는 부분 
+            // console.log("/sub/chat 에서 들어온 메시지: " + message);
+            const messageBody = message.body.trim();
+            const [senderName, chatBody] = messageBody.split(': ');
+            console.log("/sub/join 에서 들어온 메시지: " + messageBody);
+
+            addMessage({
+              senderName: senderName,
+              chatBody: chatBody
+            })
+          });
+
+
+      stompClient.current.subscribe(
+          "/sub/active-users",
+          (message) => {
+            //구독한 경로로부터 메시지가 들어오는 부분 
+            // console.log("/sub/active-users 에서 들어온 메시지: " + message);
+            const messageBody = message.body.trim();
+            console.log("/sub/active-users 에서 들어온 메시지: " + messageBody);
+  
+            // MessageProvider에 메시지 추가
+          //   addMessage({
+          //     chatCount: messageBody
+          // });
+          });
+
+      console.log("채팅방 입장 함수 실행", stompClient.current.connect);
+
     }, (error) => {
       console.error('Connection error: ', error); // 연결 실패 시 에러 처리
     });
@@ -75,33 +115,17 @@ const UseWebSocket = () => {
         "/pub/chat",
         {},
         JSON.stringify({
-          senderName : "testSenderName",
-          chatBody : "testChatbody"
+          senderName : fetchedUser.nickname,
+          chatBody : inputValue
         })
       );
+      addMessage({
+        senderName : fetchedUser.nickname,
+          chatBody : inputValue,
+          currentUser: true
+      })
     };
   };
-
-  // const subscribe = () => {
-  //   // Stomp 클라이언트를 사용하여 서버와 연결
-  //   stompClient.current.connect({}, (frame) => {
-  //     console.log("connected: ", frame);
-      
-  //     // "/sub/chat" 주제를 구독하여 새 메시지 수신 대기
-  //     stompClient.current.subscribe("/sub/chat", (message) => {
-  //       console.log("구독 동작");
-  //       const messageBody = message.body.trim();
-  //       const [senderName, chatBody] = messageBody.split(": ");
-  //       const newMessage = { senderName: senderName.trim(), chatBody: chatBody.trim() };
-  //       addMessage(newMessage); // 메시지를 MessageProvider에 추가
-  //       console.log("Added message: ", newMessage);
-  //     });
-  //   }, (error) => {
-  //     console.error('Connection error: ', error); // 연결 실패 시 에러 처리
-  //   });
-  // };
-
-  
 
   // 웹소켓 연결 해제 함수
   const disconnect = useCallback(() => {
@@ -112,36 +136,20 @@ const UseWebSocket = () => {
     }
   }, []);
 
-
-
-  // 메시지 전송 함수
-  // const sendMessage = (inputValue) => {
-  //   console.log("Sending message: ", inputValue);
-  //   if (stompClient.current && stompClient.current.connected) {
-  //     const senderName = fetchedUser.nickname;
-  //     const chatMessage = {
-  //       senderName,
-  //       chatBody: inputValue
-  //     };
-  //     stompClient.current.send("/pub/chat", {}, JSON.stringify(chatMessage)); // "/pub/chat" 주제로 메시지 전송
-  //     addMessage(chatMessage); // 메시지를 MessageProvider에 추가
-  //     setInputValue(''); // 입력값 초기화
-  //   }
-  // };
-
   // 채팅 히스토리 가져오기 함수
   const fetchChatHistory = useCallback(async () => {
     try {
       const response = await axios.get('http://localhost:8080/history'); // 채팅 히스토리 요청
-      const chatHistory = response.data; // 응답 데이터 저장
-      console.log("Fetched chat history: ", chatHistory);
-
+      const chatHistory = response.data.reverse(); // 응답 데이터 저장
+      console.log("응답 데이터: ", chatHistory);
+      console.log("message 데이터", message);
+      
       chatHistory.forEach(message => {
-        const [senderName, chatBody] = message.split(": ");
         const newMessage = {
-          senderName: senderName.trim(),
-          chatBody: chatBody.trim(),
-          currentUser: fetchedUser.nickname === senderName.trim()
+          senderName: message.senderName.trim(),
+          chatBody: message.chatBody.trim(),
+          chatTime: message.chatTime,
+          currentUser: fetchedUser.nickname === message.senderName.trim()
         };
         console.log('Adding history message:', newMessage);
         addMessage(newMessage); // 히스토리 메시지를 MessageProvider에 추가

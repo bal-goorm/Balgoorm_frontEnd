@@ -20,8 +20,8 @@ export const MessageProvider = ({ children }) => {
     const addMessage = useCallback((newMessage) => {
         setMessage((prevMessage) => {
             const updatedMessages = [...prevMessage, newMessage];
-            console.log('previous message: ', prevMessage);
-            console.log('Updated messages:', updatedMessages);
+            // console.log('previous message: ', prevMessage);
+            // console.log('Updated messages:', updatedMessages);
             return updatedMessages;
         });
     }, []);

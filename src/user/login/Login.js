@@ -6,7 +6,7 @@
  * 관리자 계정으로 로그인하면 관리자 페이지 접근 가능하게 설정
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button, Container, Form } from 'react-bootstrap';
 import { useNavigate} from 'react-router-dom';
@@ -16,7 +16,7 @@ import './Login.css';
 
 function Login() {
     const { register, handleSubmit, formState: {errors} } = useForm();
-    const { login } = useAuth();
+    const { login, user } = useAuth();
     const navigate = useNavigate();
 
     const submitForm = async (data) => {
