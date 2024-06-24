@@ -33,21 +33,33 @@ function Chat() {
   }, [inputValue, sendMessage, setInputValue]);
   
   return (
-  <div>
-    <Container className='chatting-container'>
-      {message.map((msg, index) => (
-        <div className={`message-box ${msg.currentUser ? 'right' : 'left'}`} key={index}>
-          {msg.currentUser ? (
-            <>
-              <div className='message-content'>{msg.chatBody}</div>
-              <span className='user-badge'>{msg.senderName}</span>
-            </>
-          ) : (
-            <>
-              <span className='user-badge'>{msg.senderName}</span>
-              <div className='message-content'>{msg.chatBody}</div>
-            </>
-          )}
+    <div>
+      {typeof message.chatCount === 'string' && <div>총 회원수: {message.chatCount}명</div>}
+      <Container className='chatting-container'>
+        {message.map((msg, index) => (
+          <div className={`message-box ${msg.currentUser ? 'right' : 'left'}`} key={index}>
+            {msg.currentUser ? (
+              <>
+              <div className='time-wrapper right-time'>
+                {typeof msg.chatHour === 'string' && <div className='message-time'>{msg.chatHour}:</div>}
+                {typeof msg.chatMin === 'string' && <div className='message-time'>{msg.chatMin}:</div>}
+                {typeof msg.chatSec === 'string' && <div className='message-time'>{msg.chatSec}</div>}
+              </div>
+                <div className='message-content'>{msg.chatBody}</div>
+                <span className='user-badge'>{msg.senderName}</span>
+              </>
+            ) : (
+              <>
+                <span className='user-badge'>{msg.senderName}</span>
+                <div className='message-content'>{msg.chatBody}</div>
+                <div className='time-wrapper left-time'>
+                {typeof msg.chatHour === 'string' && <div className='message-time'>{msg.chatHour}:</div>}
+                {typeof msg.chatMin === 'string' && <div className='message-time'>{msg.chatMin}:</div>}
+                {typeof msg.chatSec === 'string' && <div className='message-time'>{msg.chatSec}</div>}
+                </div>
+              </>  
+              )
+            } 
         </div>
       ))}
       <Form className='chatting-form mt-3'>

@@ -67,11 +67,15 @@ const UseWebSocket = () => {
           console.log("/sub/chat 에서 들어온 메시지: " + messageBody);
           
           const [senderName, chatBody, chatHour, chatMin, chatSec] = messageBody.split(':');
-          console.log("채팅시간 ",chatHour, chatMin, chatSec)
+          console.log("채팅시간 ", chatHour, chatMin, chatSec)
+
           if(senderName !== fetchedUser.nickname) {
             addMessage({
               senderName: senderName.trim(),
               chatBody: chatBody.trim(),
+              chatHour: chatHour.trim(),
+              chatMin: chatMin.trim(),
+              chatSec: String(Math.floor(parseFloat(chatSec.trim()))).padStart(2, '0'),
               currentUser: senderName.trim() === fetchedUser.nickname, // 현재 사용자인지 확인
             });
           }
@@ -103,11 +107,10 @@ const UseWebSocket = () => {
             // console.log("/sub/active-users 에서 들어온 메시지: " + message);
             const messageBody = message.body.trim();
             console.log("/sub/active-users 에서 들어온 메시지: " + messageBody);
-  
-            // MessageProvider에 메시지 추가
-          //   addMessage({
-          //     chatCount: messageBody
-          // });
+            const countMessage = {
+              chatCount: messageBody
+            }
+            setMessage(countMessage);
           });
 
           async function waitTime(){
@@ -126,6 +129,11 @@ const UseWebSocket = () => {
     console.log("sendMessage 조건문 외부");
     if (stompClient.current && stompClient.current.connected) {
       console.log("sendMessage 조건문 내부");
+      const now = new Date();
+      const chatHour = String(now.getHours()).padStart(2, '0');
+      const chatMin = String(now.getMinutes()).padStart(2, '0');
+      const chatSec = String(now.getSeconds()).padStart(2, '0');
+
       stompClient.current.send(
         "/pub/chat",
         {},
@@ -135,8 +143,11 @@ const UseWebSocket = () => {
         })
       );
       addMessage({
-        senderName : fetchedUser.nickname,
+          senderName : fetchedUser.nickname,
           chatBody : inputValue,
+          chatHour: chatHour,
+          chatMin: chatMin,
+          chatSec: chatSec,
           currentUser: true
       })
     };

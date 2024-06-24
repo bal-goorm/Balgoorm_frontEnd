@@ -52,6 +52,12 @@
     margin-top: 0.625rem;
   }
 
+.message-time {
+    background-color: white;
+    line-height: 1.5;
+    margin-top: 30px;
+}
+
 .form-group-inline {
     display: flex;
     align-items: center;
@@ -77,4 +83,18 @@
     align-items: center;
     justify-content: center;
     margin-right: 10px;
+}
+
+.time-wrapper {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px
+}
+
+.right-time {
+    margin-right: 0.625rem;
+}
+  
+.left-time {
+    margin-left: 0.625rem;
 }

@@ -21,7 +21,7 @@ export const MessageProvider = ({ children }) => {
         setMessage((prevMessage) => {
             const updatedMessages = [...prevMessage, newMessage];
             // console.log('previous message: ', prevMessage);
-            // console.log('Updated messages:', updatedMessages);
+            console.log('Updated messages:', updatedMessages);
             return updatedMessages;
         });
     }, []);
