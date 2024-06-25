@@ -19,7 +19,7 @@ function QuizList() {
 
     const fetchData = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/api/quiz/list/${page}?userId=${user.id}`, { withCredentials: true });
+        const response = await axios.get(`https://k618de24a93cca.user-app.krampoline.com/api/quiz/list/${page}?userId=${user.id}`, { withCredentials: true });
         setQuiz(response.data);
       } catch (error) {
         console.error('문제 요청 실패:', error);

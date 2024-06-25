@@ -51,6 +51,7 @@ const UseWebSocket = () => {
           chatBody : ""
         })
       );
+
       stompClient.current.disconnect();
     }
   }, []);

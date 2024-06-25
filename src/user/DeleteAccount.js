@@ -36,7 +36,7 @@ function DeleteAccount() {
     
     if(password) {
       try {
-        await axios.delete(`http://localhost:8080/api/deleteUser/${user.userId}`, {data: user.userId});
+        await axios.delete(`https://k618de24a93cca.user-app.krampoline.com/api/deleteUser/${user.userId}`, {data: user.userId});
         Cookies.remove('token');
         Cookies.remove('role');
         alert("계정이 삭제되었습니다. 그동안 저희 서비스를 이용해주셔서 감사합니다.");

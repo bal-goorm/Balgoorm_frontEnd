@@ -25,7 +25,7 @@ beforeEach(() => {
 });
 
 test('successful login', async () => {
-  mock.onPost('http://localhost:8080/login').reply(200, {
+  mock.onPost('https://k618de24a93cca.user-app.krampoline.com/login').reply(200, {
     token: 'fake_token',
     role: 'USER'
   });
@@ -50,7 +50,7 @@ test('successful login', async () => {
  });
 
  test('failed login', async () => {
-  mock.onPost('http://localhost:8080/login').reply(401, {
+  mock.onPost('https://k618de24a93cca.user-app.krampoline.com/login').reply(401, {
     message: 'login failed'
   });
 

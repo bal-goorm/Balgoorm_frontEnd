@@ -31,7 +31,7 @@ const Board = () => {
 
   const fetchPosts = async () => {
     try {
-      const response = await axios.get('http://localhost:8080/api/boards?page=0&pageSize=10&direction=DESC&sortBy=boardCreateDate',  { withCredentials: true });
+      const response = await axios.get('https://k618de24a93cca.user-app.krampoline.com/api/boards?page=0&pageSize=10&direction=DESC&sortBy=boardCreateDate',  { withCredentials: true });
       setPosts(response.data);
       setDisplayedPosts(response.data.slice(0, postsPerPage));
       setTotalPages(Math.ceil(response.data.length / postsPerPage));
@@ -93,7 +93,7 @@ const Board = () => {
 
   const handleLikeToggle = async (postId, isLiked) => {
     try {
-      const response = await axios.post(`http://localhost:8080/api/posts/${postId}/like`, { isLiked });
+      const response = await axios.post(`https://k618de24a93cca.user-app.krampoline.com/api/posts/${postId}/like`, { isLiked });
       const updatedPosts = posts.map(post =>
         post.boardId === postId ? { ...post, likesCount: response.data.likesCount } : post
       );
@@ -106,7 +106,7 @@ const Board = () => {
 
   const handleCommentUpdate = async (postId) => {
     try {
-      const response = await axios.get(`http://localhost:8080/api/boards/${postId}`);
+      const response = await axios.get(`https://k618de24a93cca.user-app.krampoline.com/api/boards/${postId}`);
       const updatedPosts = posts.map(post =>
         post.boardId === postId ? response.data : post
       );
@@ -143,7 +143,7 @@ const Board = () => {
   
   const handleConfirmDelete = async () => {
     try {
-      const response = await axios.delete(`http://localhost:8080/api/boards/${postToDelete.boardId}`, {
+      const response = await axios.delete(`https://k618de24a93cca.user-app.krampoline.com/api/boards/${postToDelete.boardId}`, {
         headers: {
           'Content-Type': 'application/json'
         },

@@ -13,8 +13,8 @@ const LikeButton = ({ postId, initialLikesCount, initialIsLiked, onLikeToggle })
         event.stopPropagation();
         try {
             const url = isLiked 
-                ? `http://localhost:8080/api/boards/${postId}/unlike` 
-                : `http://localhost:8080/api/boards/${postId}/like`;
+                ? `https://k618de24a93cca.user-app.krampoline.com/api/boards/${postId}/unlike` 
+                : `https://k618de24a93cca.user-app.krampoline.com/api/boards/${postId}/like`;
 
             const postData = { isLiked: !isLiked };
 

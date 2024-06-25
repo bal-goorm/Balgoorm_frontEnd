@@ -30,7 +30,7 @@ function EditorPage() {
 
     console.log("user :", user);
     console.log("user dbid :", user.id);
-    axios.get(`http://localhost:8080/api/quiz/detail/${id}?userId=${user.id}`, { withCredentials: true } )
+    axios.get(`https://k618de24a93cca.user-app.krampoline.com/api/quiz/detail/${id}?userId=${user.id}`, { withCredentials: true } )
       .then(response => {
         const data = response.data;
         console.log('Fetched problem data:', data);
@@ -55,7 +55,7 @@ function EditorPage() {
         userId: user.id
       };
       console.log("reqData :", requestData);
-      axios.post("http://localhost:8080/api/ide/run", requestData, { withCredentials: true })
+      axios.post("https://k618de24a93cca.user-app.krampoline.com/api/ide/run", requestData, { withCredentials: true })
         .then(response => {
           const data = response.data;
           setOutput(data.result);
